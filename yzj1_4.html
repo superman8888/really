@@ -1,0 +1,147 @@
+<!--_meta 作为公共模版分离出去-->
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="renderer" content="webkit|ie-comp|ie-stand">
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+<link rel="Bookmark" href="/favicon.ico" >
+<link rel="Shortcut Icon" href="/favicon.ico" />
+<link rel="stylesheet" type="text/css" href="static/h-ui/css/H-ui.min.css" />
+<link rel="stylesheet" type="text/css" href="static/h-ui.admin/css/H-ui.admin.css" />
+<link rel="stylesheet" type="text/css" href="lib/Hui-iconfont/1.0.8/iconfont.css" />
+<link rel="stylesheet" type="text/css" href="static/h-ui.admin/css/style.css" />
+<link rel="stylesheet" type="text/css" href="common/css/hui.css"/>
+<title></title>
+</head>
+
+<style type="text/css">
+	.input-text[type="number"]{
+		width: 100%;
+	}
+	body{
+		background-color: white;
+	}
+	
+</style>
+<body>
+	
+<article class="page-container">
+	<form action="" method="post" class="form form-horizontal" id="myform">
+		
+		<div class="row cl">
+			<label class="form-label col-xs-4 col-sm-3">带宽属性：</label>
+				<div class="col-xs-4 col-sm-2">
+					<input name="bandwidth_type" type="radio" value="1">
+					<label for="">绑定云主机</label>
+				</div>
+				<div class="col-xs-4 col-sm-2">
+					<input name="bandwidth_type" type="radio" value="2" checked="checked">
+					<label for="">弹性</label>
+				</div>
+				
+			</div>
+		</div>
+		<div id="ppp">
+			
+		</div>
+		
+		<input type="hidden" name="order_sn" id="order_sn" value="" />
+		<div class="row cl">
+			<div class="col-xs-8 col-sm-9 col-xs-offset-4 col-sm-offset-3">
+				<input class="btn btn-primary radius subbtn" type="button" value="&nbsp;&nbsp;提交&nbsp;&nbsp;">
+			</div>
+		</div>
+	</form>
+	<input type="hidden" name="jz" id="jz" value="" />
+</article>
+
+<!--_footer 作为公共模版分离出去-->
+<script type="text/javascript" src="lib/jquery/1.9.1/jquery.min.js"></script> 
+<script type="text/javascript" src="lib/layer/2.4/layer.js"></script>
+<script type="text/javascript" src="static/h-ui/js/H-ui.min.js"></script> 
+<script type="text/javascript" src="static/h-ui.admin/js/H-ui.admin.js"></script>
+<script src="common/js/hui.js" type="text/javascript" charset="utf-8"></script>
+<script type="text/javascript">
+$.ajax({
+	type:"post",
+	url:"http://order.1allnet.com/atelecom/admin/judge_login.php",
+	async:true,
+	dataType:"json",
+	data:{type:6},
+	success:function(data){
+		if(data.CODE==1005){
+			window.open("login.html","_self")
+		}
+	}
+});
+$("input:radio[name='bandwidth_type']").change(function(){
+	var index=$("input:radio[name='bandwidth_type']:checked").val();
+	if(index==1){
+		$("#ppp").hide();
+	}else{
+		$("#ppp").show();
+	}
+})
+$.ajax({
+	type:"post",
+	url:"http://order.1allnet.com/atelecom/app/manage_order.php?act=host_number",
+	async:true,
+	dataType:"json",
+	data:{order_sn:localStorage.getItem("order_sn")},
+	success:function(data){
+		for(var i=0;i<data;i++){
+			var index=i+1;
+			var str="<div class='row cl'><label class='form-label col-xs-4 col-sm-3'>公网带宽"+index+"：</label><div class='formControls col-xs-8 col-sm-9'><input type='text' class='input-text bandwidth' placeholder='单位：M'></div></div>";
+			$("#ppp").append(str)
+		}
+		
+	}
+});
+$(".subbtn").click(function(){
+	
+	var index= $("input:radio[name='bandwidth_type']:checked").val();
+	if(index==2){
+		$("#order_sn").val(localStorage.getItem("order_sn"));
+		var form=$("#myform").serializeArray();
+		var arr=[];
+		$('.bandwidth').each(function(i,ele){
+			
+			arr.push($(ele).val()) 
+		})
+		var obj={};
+		obj.name="bandwidth";
+		obj.value=arr;
+		form.push(obj)
+		console.info(form)
+		$.ajax({
+			type:"post",
+			url:"http://order.1allnet.com/atelecom/app/manage_order.php?act=add_bandwidth",
+			async:true,
+			dataType:"json",
+			data:form,
+			success:function(data){
+				if(data.CODE==1005){
+					alert(data.INFO)
+				}else{
+					alert(data.INFO)
+
+					 hui.confirm('是否添加块存储？', ['否','是'], function(){
+					        console.log('确认后执行...');
+					    },function(){
+					      	window.open("yzj1.html","_self")
+					    });
+					
+				}
+			}
+		});
+	}else{
+		window.open("yzj1_2.html","_self")
+	}
+})
+</script> 
+<!--/请在上方写此页面业务相关的脚本-->
+</body>
+</html>
